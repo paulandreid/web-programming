@@ -1,0 +1,157 @@
+<html>
+<head>
+<script>
+var previousCategory="NONE";
+
+//use this in run(windows+r)
+//chrome.exe --user-data-dir="C:/Chrome dev session" --disable-web-security
+function ajax_insert(){
+    // Create our XMLHttpRequest object
+    var req = new XMLHttpRequest();
+    // Create some variables we need to send to our PHP file
+    var url = "http://localhost/insert.php"; //url to our php file
+    var id = document.getElementById("id").value; //get values from html
+    var Model = document.getElementById("Model").value;
+    var Power = document.getElementById("Power").value; //get values from html
+    var Price = document.getElementById("Price").value;
+    var Fuel = document.getElementById("Fuel").value;
+    var vars = "id="+id+"&Model="+Model+"&Power="+Power+"&Price="+Price+"&Fuel="+Fuel;
+    req.open("POST", url, true);//(method,url,async)
+    // Set content type header information for sending url encoded variables in the request
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");// (header, value) value=encoded data sent from a form
+    // Access the onreadystatechange event for the XMLHttpRequest object
+    req.onreadystatechange = function() { //the function to be executed when the readyState changes
+	    if(req.readyState == 4 ) {
+			ajax_show();
+	    }
+    }
+    
+    req.send(vars); // execute the request
+    
+}
+
+function ajax_update(){
+    
+    var x=document.getElementById("id"); //take the value from the id field
+    var id=x.value;
+    
+    
+    var Model = document.getElementById("Model").value;
+    var Power = document.getElementById("Power").value; //get values from html
+    var Price = document.getElementById("Price").value;
+    var Fuel = document.getElementById("Fuel").value;
+    var vars = "id="+id+"&Model="+Model+"&Power="+Power+"&Price="+Price+"&Fuel="+Fuel;
+    var req = new XMLHttpRequest();
+    // Create some variables we need to send to our PHP file
+    var url = "http://localhost/update.php"; //url to our php file
+    req.open("POST", url, true);
+    // Set content type header information for sending url encoded variables in the request
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // Access the onreadystatechange event for the XMLHttpRequest object
+    req.onreadystatechange = function() { //the function to be executed when the readyState changes
+	    if(req.readyState == 4 ) {
+            if(req.responseText=="1")
+			document.getElementById(id).innerHTML =  'id: ' +id + 
+      '||  Model: ' +Model+ ' ||  Power:'+Power+ ' ||  Fuel ' + Fuel + ' ||  Price ' +Price +
+      '<button onclick="pre_update('+ id +');">  Edit </button><button onclick="ajax_delete('+ id +');">  Delete </button>';
+	    }
+    }
+   
+    req.send(vars); //  execute the request
+
+    x.readOnly=false;
+    x.value="";
+     document.getElementById("Model").value="";
+    document.getElementById("Power").value=""; 
+    document.getElementById("Price").value="";
+}
+
+function pre_update(id){
+    var x=document.getElementById("id"); //take the id value from <p> and set it in the id field
+    x.value=id;
+    x.readOnly=true;
+}
+
+function ajax_show(){
+    var req = new XMLHttpRequest();
+    // Create some variables we need to send to our PHP file
+    var url = "http://localhost/show.php"; //url to our php file
+    req.open("POST", url, true);
+    // Set content type header information for sending url encoded variables in the request
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // Access the onreadystatechange event for the XMLHttpRequest object
+    req.onreadystatechange = function() { //the function to be executed when the readyState changes
+	    if(req.readyState == 4 ) {
+			document.getElementById("display").innerHTML = req.responseText;
+	    }
+    }
+ 
+    req.send(); //  execute the request
+}
+
+function ajax_delete(id){
+    var x=document.getElementById(id);
+
+    var vars = "id="+id;
+    var req = new XMLHttpRequest();
+    // Create some variables we need to send to our PHP file
+    var url = "http://localhost/delete.php"; //url to our php file
+    req.open("POST", url, true);
+    // Set content type header information for sending url encoded variables in the request
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // Access the onreadystatechange event for the XMLHttpRequest object
+    req.onreadystatechange = function() { //the function to be executed when the readyState changes
+	    if(req.readyState == 4 ) {
+            if(req.responseText=="1")
+			x.remove();
+	    }
+    }
+  
+    req.send(vars); //  execute the request
+
+  
+}
+
+function ajax_searchCategory(element){
+  lastCategory(element);
+  var x=document.getElementById(element);
+  var vars="category="+element+"&categoryInput="+x.value;
+  var req = new XMLHttpRequest();
+    // Create some variables we need to send to our PHP file
+    var url = "http://localhost/showCategory.php"; //url to our php file
+    req.open("POST", url, true);
+    // Set content type header information for sending url encoded variables in the request
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // Access the onreadystatechange event for the XMLHttpRequest object
+    req.onreadystatechange = function() {
+	    if(req.readyState == 4 ) {
+            document.getElementById("display").innerHTML=req.responseText;
+	    }
+    }
+   
+    req.send(vars); //  execute the request
+}
+
+function lastCategory(category){
+  document.getElementById("category").innerHTML="<p id='category'>Previous Search: <b> "+previousCategory+" </b></p>";
+  previousCategory=category+" "+document.getElementById(category).value;
+}
+</script>
+</head>
+<body>
+<h2>SH car site</h2>
+id: <input id="id" name="id" type="text"> </input> <br><br>
+Model: <input id="Model" name="Model" type="text"> <button onclick=ajax_searchCategory("Model");>  Search by </button> </input> <br><br>
+Power: <input id="Power" name="Power" type="text"><button onclick=ajax_searchCategory("Power");>  Search by </button> </input>  <br><br>
+Fuel: <input id="Fuel" name="Fuel" type="text"><button onclick=ajax_searchCategory("Fuel");>  Search by </button> </input> <br><br>
+Price: <input id="Price" name="Price" type="text"><button onclick=ajax_searchCategory("Price");>  Search by </button> </input> <br><br>
+
+<input name="myBtn" type="submit" value="Submit Data" onclick="ajax_insert();"> <br><br>
+<input name="myBtn" type="submit" value="Show Data" onclick="ajax_show();"> <br><br>
+<input name="myBtn" type="submit" value="Update Data" onclick="ajax_update();"> 
+<p id="category">Previous Search: <b> NONE </b></p>
+<div id="display"></div>
+
+
+</body>
+</html>
